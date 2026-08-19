@@ -1,6 +1,6 @@
 # UaiMoney 💰
 
-Sistema de controle financeiro focado na agilidade e no uso diário pelo celular.
+Sistema de controle financeiro focado na agilidade e no uso diário.
 
 ## O Projeto
 O UaiMoney nasceu com a proposta de ser um Produto Mínimo Viável (MVP) rápido e funcional. O objetivo é evitar a complexidade extrema, permitindo o registro de entradas e saídas de forma direta e sem atrito.
