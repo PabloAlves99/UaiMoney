@@ -6,13 +6,24 @@ $entradas = 0;
 $saidas = 0;
 $saldo = 0;
 $transacoes = [];
-$erro = ''; // Inicializa limpo para evitar faixas indesejadas
+$erro = '';
+
+// 1. Lógica do Filtro de Datas
+$data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : date('Y-m-01');
+$data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : date('Y-m-t');
 
 try {
-    $sql = "SELECT * FROM transacoes ORDER BY data DESC, id DESC";
-    $stmt = $pdo->query($sql);
+    // 2. SQL Mágico
+    $sql = "SELECT * FROM transacoes 
+            WHERE data >= :data_inicio AND data <= :data_fim 
+            AND IFNULL(tipo_registro, 'unico') != 'pai' 
+            ORDER BY data DESC, id DESC";
+
+    $stmt = $pdo->prepare($sql);
+    $stmt->execute([':data_inicio' => $data_inicio, ':data_fim' => $data_fim]);
     $transacoes = $stmt->fetchAll(PDO::FETCH_ASSOC);
 
+    // 3. Soma apenas o que está dentro do filtro
     foreach ($transacoes as $t) {
         if ($t['tipo'] === 'Entrada') {
             $entradas += $t['valor'];
@@ -45,7 +56,6 @@ try {
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Cartões dos resumos */
         .card-custom {
             border-radius: 14px;
             background-color: #1c2541;
@@ -53,13 +63,14 @@ try {
             box-shadow: 0 8px 24px rgba(0, 0, 0, 0.4);
         }
 
-        /* Textos auxiliares */
         .texto-auxiliar {
             color: #94a3b8 !important;
             font-weight: 500;
+            font-size: 0.8rem;
+            margin-bottom: 2px;
         }
 
-        /* Tabela com fundo transparente e letras em branco */
+        /* Tabela */
         .table {
             color: #ffffff;
             background-color: transparent !important;
@@ -77,7 +88,7 @@ try {
             color: #ffffff;
         }
 
-        /* Cores de destaque personalizadas */
+        /* Cores */
         .texto-verde {
             color: #34d399;
             font-weight: bold;
@@ -93,7 +104,7 @@ try {
             font-weight: bold;
         }
 
-        /* Botões de Ação */
+        /* Botões */
         .btn-success {
             background-color: #059669;
             border: none;
@@ -114,6 +125,21 @@ try {
             background-color: #be123c;
         }
 
+        .btn-info-custom {
+            background-color: #0ea5e9;
+            border: none;
+            font-weight: 600;
+            color: white;
+            height: 38px;
+            align-self: flex-end;
+        }
+
+        .btn-info-custom:hover {
+            background-color: #0284c7;
+            color: white;
+        }
+
+        /* Ações da Tabela */
         .btn-action-edit {
             background-color: rgba(255, 255, 255, 0.05);
             color: #fbbf24;
@@ -141,6 +167,44 @@ try {
             color: #ffffff;
             letter-spacing: 0.5px;
         }
+
+        /* Filtro Input Minimalista */
+        .input-filtro {
+            background-color: #131b2e;
+            border: 1px solid #3a506b;
+            color: #ffffff;
+            border-radius: 8px;
+            padding: 6px 12px;
+            height: 38px;
+        }
+
+        .input-filtro:focus {
+            background-color: #131b2e;
+            border-color: #38bdf8;
+            color: #ffffff;
+            box-shadow: 0 0 0 0.25rem rgba(56, 189, 248, 0.25);
+            outline: none;
+        }
+
+        ::-webkit-calendar-picker-indicator {
+            filter: invert(1);
+            cursor: pointer;
+        }
+
+        .form-group-custom {
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Efeito de Clique nos Cards */
+        .card-clicavel {
+            cursor: pointer;
+            transition: transform 0.2s, opacity 0.3s;
+        }
+
+        .card-clicavel:active {
+            transform: scale(0.98);
+        }
     </style>
 </head>
 
@@ -148,32 +212,60 @@ try {
 
     <div class="container mt-5 mb-5">
 
-        <!-- Cabeçalho Limpo -->
-        <div class="row align-items-center mb-4">
-            <div class="col-md-6">
-                <h2 class="navbar-brand fs-3">💙 Uai<span style="color: #38bdf8;">Money</span></h2>
+        <!-- Cabeçalho Limpo e Alinhado -->
+        <div class="row align-items-end mb-4">
+
+            <div class="col-xl-3 col-lg-2 col-md-12 mb-3 mb-lg-0 text-center text-lg-start">
+                <h2 class="navbar-brand fs-3 m-0">💙 Uai<span style="color: #38bdf8;">Money</span></h2>
             </div>
-            <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                <a href="../entradas/nova_entrada.php" class="btn btn-success me-2 px-3 py-2 shadow-sm">+ Nova Entrada</a>
-                <a href="../saidas/nova_saida.php" class="btn btn-danger px-3 py-2 shadow-sm">+ Nova Saída</a>
+
+            <div
+                class="col-xl-9 col-lg-10 col-md-12 d-flex flex-wrap justify-content-center justify-content-lg-end align-items-end gap-3">
+
+                <form method="GET" class="d-flex flex-wrap align-items-end gap-2 m-0"
+                    style="background: transparent; border: none; padding: 0;">
+                    <div class="form-group-custom">
+                        <label class="texto-auxiliar">Início</label>
+                        <input type="date" name="data_inicio" class="input-filtro"
+                            value="<?php echo htmlspecialchars($data_inicio); ?>" required>
+                    </div>
+                    <div class="form-group-custom">
+                        <label class="texto-auxiliar">Fim</label>
+                        <input type="date" name="data_fim" class="input-filtro"
+                            value="<?php echo htmlspecialchars($data_fim); ?>" required>
+                    </div>
+                    <button type="submit" class="btn btn-info-custom px-3 shadow-sm">Filtrar</button>
+                </form>
+
+                <div class="d-none d-lg-block" style="border-left: 1px solid #3a506b; height: 38px;"></div>
+
+                <div class="d-flex gap-2">
+                    <a href="../entradas/nova_entrada.php"
+                        class="btn btn-success px-3 shadow-sm d-flex align-items-center" style="height: 38px;">+
+                        Nova Receita</a>
+                    <a href="../saidas/nova_saida.php" class="btn btn-danger px-3 shadow-sm d-flex align-items-center"
+                        style="height: 38px;">+ Nova Despesa</a>
+                </div>
+
             </div>
         </div>
 
-        <!-- Exibe a faixa de erro apenas se a variável $erro tiver algum conteúdo real -->
         <?php if (!empty($erro)): ?>
             <div class="alert alert-danger bg-dark text-danger border-danger mb-4"><?php echo $erro; ?></div>
         <?php endif; ?>
 
-        <!-- Cartões de Resumo -->
+        <!-- Cartões de Resumo com IDs e OnClick -->
         <div class="row mb-4">
             <div class="col-md-4 mb-3">
-                <div class="card card-custom p-3 text-center border-top border-success border-3">
+                <div class="card card-custom p-3 text-center border-top border-success border-3 card-clicavel"
+                    id="card-entradas" onclick="filtrarTabela('Entrada')" title="Clique para ver apenas Entradas">
                     <h6 class="text-uppercase fs-6 texto-auxiliar mb-2">Entradas 📈</h6>
                     <h3 class="texto-verde">R$ <?php echo number_format($entradas, 2, ',', '.'); ?></h3>
                 </div>
             </div>
             <div class="col-md-4 mb-3">
-                <div class="card card-custom p-3 text-center border-top border-danger border-3">
+                <div class="card card-custom p-3 text-center border-top border-danger border-3 card-clicavel"
+                    id="card-saidas" onclick="filtrarTabela('Saída')" title="Clique para ver apenas Saídas">
                     <h6 class="text-uppercase fs-6 texto-auxiliar mb-2">Saídas 📉</h6>
                     <h3 class="texto-vermelho">R$ <?php echo number_format($saidas, 2, ',', '.'); ?></h3>
                 </div>
@@ -181,17 +273,19 @@ try {
             <div class="col-md-4 mb-3">
                 <div class="card card-custom p-3 text-center border-top border-3"
                     style="border-color: #38bdf8 !important;">
-                    <h6 class="text-uppercase fs-6 texto-auxiliar mb-2">Saldo Atual 💰</h6>
+                    <h6 class="text-uppercase fs-6 texto-auxiliar mb-2">Saldo do Período 💰</h6>
                     <h3 class="texto-azul">R$ <?php echo number_format($saldo, 2, ',', '.'); ?></h3>
                 </div>
             </div>
         </div>
 
-        <!-- Tabela com Fundo Transparente e Letras Brancas -->
+        <!-- Tabela -->
         <div class="card card-custom p-4">
-            <h4 class="mb-3 fs-5 text-white">Histórico de Transações</h4>
+            <h4 class="mb-3 fs-5 text-white" id="titulo-tabela">Transações de
+                <?php echo date('d/m/Y', strtotime($data_inicio)); ?> a
+                <?php echo date('d/m/Y', strtotime($data_fim)); ?></h4>
             <div class="table-responsive">
-                <table class="table align-middle">
+                <table class="table align-middle table-hover">
                     <thead>
                         <tr style="border-bottom: 2px solid #3a506b;">
                             <th class="py-3 text-white">Data</th>
@@ -207,7 +301,8 @@ try {
                     <tbody>
                         <?php if (count($transacoes) > 0): ?>
                             <?php foreach ($transacoes as $t): ?>
-                                <tr>
+                                <!-- A MÁGICA: Colocamos a classe e o data-tipo aqui na linha -->
+                                <tr class="linha-transacao" data-tipo="<?php echo $t['tipo']; ?>">
                                     <td><?php echo date('d/m/Y', strtotime($t['data'])); ?></td>
                                     <td>
                                         <?php if ($t['tipo'] == 'Entrada'): ?>
@@ -220,10 +315,16 @@ try {
                                     </td>
                                     <td><?php echo htmlspecialchars($t['grupo']); ?></td>
                                     <td><?php echo htmlspecialchars($t['subgrupo']); ?></td>
-                                    <td><?php echo htmlspecialchars($t['descricao']); ?></td>
+                                    <td>
+                                        <?php echo htmlspecialchars($t['descricao']); ?>
+                                        <?php if (isset($t['tipo_registro']) && $t['tipo_registro'] == 'parcela'): ?>
+                                            <br><small class="text-info" style="font-size: 0.75rem;"><i
+                                                    class="bi bi-arrow-repeat"></i> Recorrente</small>
+                                        <?php endif; ?>
+                                    </td>
                                     <td>
                                         <?php
-                                        echo htmlspecialchars($t['forma_pagamento']);
+                                        echo htmlspecialchars($t['forma_pagamento'] ?? '');
                                         if (!empty($t['banco_cartao'])) {
                                             echo " (" . htmlspecialchars($t['banco_cartao']) . ")";
                                         }
@@ -239,7 +340,7 @@ try {
                                         </a>
                                         <a href="../acoes/deletar.php?id=<?php echo $t['id']; ?>"
                                             class="btn btn-sm btn-action-delete" title="Apagar"
-                                            onclick="return confirm('Tem a certeza de que quer apagar este registo, Uai?');">
+                                            onclick="return confirm('Tem certeza de que quer apagar este registro, Uai?');">
                                             <i class="bi bi-trash-fill"></i>
                                         </a>
                                     </td>
@@ -247,8 +348,8 @@ try {
                             <?php endforeach; ?>
                         <?php else: ?>
                             <tr>
-                                <td colspan="8" class="text-center texto-auxiliar p-4">Nenhuma transação registada ainda.
-                                    Comece a poupar, Uai!</td>
+                                <td colspan="8" class="text-center texto-auxiliar p-4">Nenhuma transação registrada neste
+                                    período. Comece a poupar, Uai!</td>
                             </tr>
                         <?php endif; ?>
                     </tbody>
@@ -258,6 +359,52 @@ try {
 
     </div>
 
+    <!-- O Cérebro do Filtro em JavaScript -->
+    <script>
+        let filtroAtivo = null;
+
+        function filtrarTabela(tipo) {
+            const linhas = document.querySelectorAll('.linha-transacao');
+            const cardEntradas = document.getElementById('card-entradas');
+            const cardSaidas = document.getElementById('card-saidas');
+            const tituloTabela = document.getElementById('titulo-tabela');
+            const dataOriginal = "<?php echo date('d/m/Y', strtotime($data_inicio)); ?> a <?php echo date('d/m/Y', strtotime($data_fim)); ?>";
+
+            // Se clicar no mesmo card que já estava ativo, remove o filtro
+            if (filtroAtivo === tipo) {
+                filtroAtivo = null;
+                linhas.forEach(linha => linha.style.display = ''); // Mostra tudo
+
+                // Restaura o visual dos cards e do título
+                cardEntradas.style.opacity = '1';
+                cardSaidas.style.opacity = '1';
+                tituloTabela.innerHTML = `Transações de ${dataOriginal}`;
+                return;
+            }
+
+            // Ativa o novo filtro
+            filtroAtivo = tipo;
+
+            linhas.forEach(linha => {
+                if (linha.getAttribute('data-tipo') === tipo) {
+                    linha.style.display = ''; // Mostra a linha
+                } else {
+                    linha.style.display = 'none'; // Esconde a linha
+                }
+            });
+
+            // Efeito visual de destaque nos cards
+            if (tipo === 'Entrada') {
+                cardEntradas.style.opacity = '1';
+                cardSaidas.style.opacity = '0.3'; // Apaga o vermelho
+                tituloTabela.innerHTML = `Entradas (${dataOriginal})`;
+            } else {
+                cardEntradas.style.opacity = '0.3'; // Apaga o verde
+                cardSaidas.style.opacity = '1';
+                tituloTabela.innerHTML = `Saídas (${dataOriginal})`;
+            }
+        }
+    </script>
 </body>
 
 </html>
