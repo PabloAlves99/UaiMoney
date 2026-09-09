@@ -5,6 +5,10 @@ include '../db/conexao.php';
 $mensagem = '';
 $voltar = isset($_SERVER['HTTP_REFERER']) ? $_SERVER['HTTP_REFERER'] : '../dashboard.php';
 
+// Busca os grupos dinamicamente no banco
+$stmtGrupos = $pdo->query("SELECT * FROM grupos ORDER BY nome ASC");
+$listaGrupos = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC);
+
 if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     $tipo = $_POST['tipo'];
     $grupo = $_POST['grupo'];
@@ -15,7 +19,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     try {
         $sql = "INSERT INTO subgrupos (tipo, grupo, nome, descricao) VALUES (:tipo, :grupo, :nome, :descricao)";
         $stmt = $pdo->prepare($sql);
-
         $stmt->execute([
             ':tipo' => $tipo,
             ':grupo' => $grupo,
@@ -25,7 +28,6 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
 
         header("Location: " . $url_retorno);
         exit();
-
     } catch (Exception $e) {
         $mensagem = "<div class='alert alert-danger bg-dark text-danger border-danger mt-3'>Erro: " . $e->getMessage() . "</div>";
     }
@@ -39,6 +41,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <meta charset="UTF-8">
     <title>Cadastrar Subgrupo - UaiMoney</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
         body {
             background-color: #0b132b;
@@ -108,7 +111,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-                <h2 class="text-center mb-4" style="color: #38bdf8;">📌 Novo Subgrupo</h2>
+                <h2 class="text-center mb-4" style="color: #38bdf8; font-weight:bold;">📌 Novo Subgrupo</h2>
                 <div class="card card-custom p-4">
                     <form method="POST" action="novo_subgrupo.php">
                         <input type="hidden" name="url_retorno" value="<?php echo htmlspecialchars($voltar); ?>">
@@ -123,16 +126,20 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Grupo Fixo (Classificação) *</label>
-                            <select name="grupo" class="form-select" id="grupoSelect" required>
-                                <!-- Preenchido dinamicamente pelo JavaScript -->
-                            </select>
+                            <label class="form-label">Grupo Pai *</label>
+                            <div class="input-group">
+                                <select name="grupo" class="form-select" id="grupoSelect" required></select>
+                                <a href="../grupos/index.php" class="btn btn-outline-secondary"
+                                    title="Gerenciar Grupos">
+                                    <i class="bi bi-gear-fill"></i>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="mb-3">
                             <label class="form-label">Nome do Subgrupo *</label>
                             <input type="text" name="nome" class="form-control"
-                                placeholder="Ex: Supermercado, Aluguel, Salário..." required>
+                                placeholder="Ex: Supermercado, Aluguel..." required>
                         </div>
 
                         <div class="mb-4">
@@ -152,34 +159,39 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
     </div>
 
     <script>
+        // Recebe os dados do PHP dinamicamente
+        const gruposCadastrados = <?php echo json_encode($listaGrupos); ?>;
+
         function atualizarGrupos() {
             const tipo = document.getElementById('tipoSelect').value;
             const grupoSelect = document.getElementById('grupoSelect');
-
             grupoSelect.innerHTML = '';
 
-            if (tipo === 'Entrada') {
-                const gruposEntrada = ['Renda Fixa', 'Renda Variável'];
-                gruposEntrada.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g;
-                    opt.textContent = g;
-                    grupoSelect.appendChild(opt);
-                });
-            } else {
-                const gruposSaida = ['Essencial', 'Lazer', 'Investimento', 'Dívidas / Empréstimos'];
-                gruposSaida.forEach(g => {
-                    const opt = document.createElement('option');
-                    opt.value = g;
-                    opt.textContent = g;
-                    grupoSelect.appendChild(opt);
-                });
+            const gruposFiltrados = gruposCadastrados.filter(g => g.tipo === tipo);
+
+            if (gruposFiltrados.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "Nenhum grupo cadastrado!";
+                grupoSelect.appendChild(opt);
+                return;
             }
+
+            gruposFiltrados.forEach(g => {
+                const opt = document.createElement('option');
+                opt.value = g.nome;
+                opt.textContent = g.nome;
+
+                if (tipo === 'Saída' && g.nome === 'Gastos') {
+                    opt.selected = true;
+                }
+
+                grupoSelect.appendChild(opt);
+            });
         }
 
         window.onload = atualizarGrupos;
     </script>
-
 </body>
 
 </html>

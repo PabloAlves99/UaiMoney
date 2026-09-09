@@ -1,9 +1,13 @@
 <?php
-// Inclui o motor central de base de dados da pasta db (caminho correto para subpastas)
+// Inclui o motor central de base de dados da pasta db
 include '../db/conexao.php';
 
 $mensagem = '';
 $subgrupo = null;
+
+// Busca os grupos dinamicamente no banco
+$stmtGrupos = $pdo->query("SELECT * FROM grupos ORDER BY nome ASC");
+$listaGrupos = $stmtGrupos->fetchAll(PDO::FETCH_ASSOC);
 
 try {
     if ($_SERVER['REQUEST_METHOD'] === 'POST') {
@@ -31,7 +35,6 @@ try {
         $stmt->execute([':id' => $_GET['id']]);
         $subgrupo = $stmt->fetch(PDO::FETCH_ASSOC);
     }
-
 } catch (Exception $e) {
     $mensagem = "<div class='alert alert-danger bg-dark text-danger border-danger mt-3'>Erro: " . $e->getMessage() . "</div>";
 }
@@ -46,19 +49,16 @@ if (!$subgrupo) {
 
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>UaiMoney - Editar Subgrupo</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <style>
-        /* Azul Tecnológico Profundo & Sofisticado */
         body {
             background-color: #0b132b;
             color: #ffffff;
             font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
         }
 
-        /* Cartão personalizado */
         .card-custom {
             border-radius: 14px;
             background-color: #1c2541;
@@ -92,11 +92,6 @@ if (!$subgrupo) {
             opacity: 1;
         }
 
-        .texto-auxiliar {
-            color: #94a3b8 !important;
-            font-weight: 500;
-        }
-
         .btn-info-custom {
             background-color: #0ea5e9;
             border: none;
@@ -119,27 +114,17 @@ if (!$subgrupo) {
             color: #ffffff;
             border-color: #3a506b;
         }
-
-        .navbar-brand {
-            font-weight: bold;
-            color: #ffffff;
-            letter-spacing: 0.5px;
-        }
     </style>
 </head>
 
 <body>
-
     <div class="container mt-5 mb-5">
         <div class="row justify-content-center">
             <div class="col-md-6">
-
-                <h2 class="text-center mb-4 navbar-brand fs-3" style="color: #38bdf8;">✏️ Editar Subgrupo</h2>
-
+                <h2 class="text-center mb-4 fs-3" style="color: #38bdf8; font-weight:bold;">✏️ Editar Subgrupo</h2>
                 <?php if (!empty($mensagem)): ?>
                     <?php echo $mensagem; ?>
                 <?php endif; ?>
-
                 <div class="card card-custom p-4">
                     <form method="POST" action="editar_subgrupo.php">
                         <input type="hidden" name="id" value="<?php echo $subgrupo['id']; ?>">
@@ -158,10 +143,14 @@ if (!$subgrupo) {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Grupo Fixo (Classificação) *</label>
-                            <select name="grupo" class="form-select" id="grupoSelect" required>
-                                <!-- Preenchido dinamicamente pelo JavaScript -->
-                            </select>
+                            <label class="form-label">Grupo *</label>
+                            <div class="input-group">
+                                <select name="grupo" class="form-select" id="grupoSelect" required></select>
+                                <a href="../grupos/index.php" class="btn btn-outline-secondary"
+                                    title="Gerenciar Grupos">
+                                    <i class="bi bi-gear-fill"></i>
+                                </a>
+                            </div>
                         </div>
 
                         <div class="mb-3">
@@ -180,32 +169,34 @@ if (!$subgrupo) {
                         <a href="index.php" class="btn btn-outline-secondary w-100 py-2 mt-2">Cancelar</a>
                     </form>
                 </div>
-
             </div>
         </div>
     </div>
 
     <script>
         const grupoAtual = "<?php echo htmlspecialchars($subgrupo['grupo']); ?>";
+        const gruposCadastrados = <?php echo json_encode($listaGrupos); ?>;
 
         function atualizarGrupos() {
             const tipo = document.getElementById('tipoSelect').value;
             const grupoSelect = document.getElementById('grupoSelect');
-
             grupoSelect.innerHTML = '';
 
-            let opcoes = [];
-            if (tipo === 'Entrada') {
-                opcoes = ['Renda Fixa', 'Renda Variável'];
-            } else {
-                opcoes = ['Essencial', 'Lazer', 'Investimento', 'Dívidas / Empréstimos'];
+            const gruposFiltrados = gruposCadastrados.filter(g => g.tipo === tipo);
+
+            if (gruposFiltrados.length === 0) {
+                const opt = document.createElement('option');
+                opt.value = "";
+                opt.textContent = "Nenhum grupo cadastrado!";
+                grupoSelect.appendChild(opt);
+                return;
             }
 
-            opcoes.forEach(g => {
+            gruposFiltrados.forEach(g => {
                 const opt = document.createElement('option');
-                opt.value = g;
-                opt.textContent = g;
-                if (g === grupoAtual) {
+                opt.value = g.nome;
+                opt.textContent = g.nome;
+                if (g.nome === grupoAtual) {
                     opt.selected = true;
                 }
                 grupoSelect.appendChild(opt);
@@ -214,7 +205,6 @@ if (!$subgrupo) {
 
         window.onload = atualizarGrupos;
     </script>
-
 </body>
 
 </html>
