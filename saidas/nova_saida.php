@@ -183,12 +183,13 @@ try {
                         <div class="mb-3" id="blocoBanco" style="display: none;">
                             <label class="form-label" style="color: #38bdf8;">💳 Qual é o Banco / Cartão?</label>
                             <select name="banco_cartao" class="form-select border-info">
-                                <option value="Nubank">Nubank (Roxinho)</option>
-                                <option value="Inter">Banco Inter</option>
-                                <option value="Itaú">Itaú</option>
-                                <option value="C6 Bank">C6 Bank</option>
                                 <option value="Santander">Santander</option>
+                                <option value="Inter">Banco Inter</option>
                                 <option value="Bradesco">Bradesco</option>
+                                <option value="Itaú">Caixa</option>
+                                <option value="C6 Bank">C6 Bank</option>
+                                <option value="Itaú">Itaú</option>
+                                <option value="Nubank">Nubank</option>
                                 <option value="Outro">Outro Banco</option>
                             </select>
                         </div>

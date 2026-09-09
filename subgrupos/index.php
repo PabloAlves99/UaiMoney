@@ -119,8 +119,8 @@ try {
                 <h2 class="navbar-brand fs-3">📌 Gestão de Subgrupos</h2>
             </div>
             <div class="col-md-6 text-md-end mt-3 mt-md-0">
-                <a href="javascript:history.back()" class="btn btn-outline-secondary me-2 px-3 py-2 shadow-sm">
-                    <i class="bi bi-arrow-left"></i> Voltar
+                <a href="../view/dashboard.php" class="btn btn-outline-secondary me-2 px-3 py-2 shadow-sm">
+                    <i class="bi bi-arrow-left"></i> Tela inicial
                 </a>
                 <a href="novo_subgrupo.php" class="btn btn-info-custom px-3 py-2 shadow-sm">+ Novo Subgrupo</a>
             </div>

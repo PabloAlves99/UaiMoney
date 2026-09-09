@@ -171,7 +171,7 @@ try {
                             <select name="forma_pagamento" class="form-select">
                                 <option value="Pix">Pix</option>
                                 <option value="Dinheiro">Dinheiro Físico</option>
-                                <option value="Transferência">Transferência Bancária</option>
+                                <option value="Transferência">Transferência</option>
                             </select>
                         </div>
 
