@@ -126,7 +126,7 @@ if ($_SERVER['REQUEST_METHOD'] === 'POST') {
                         </div>
 
                         <div class="mb-3">
-                            <label class="form-label">Grupo Pai *</label>
+                            <label class="form-label">Grupo *</label>
                             <div class="input-group">
                                 <select name="grupo" class="form-select" id="grupoSelect" required></select>
                                 <a href="../grupos/index.php" class="btn btn-outline-secondary"
