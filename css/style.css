@@ -191,6 +191,9 @@ body {
     outline: none;
     font-size: .86rem;
     transition: .18s ease;
+
+    -webkit-appearance: none; 
+    appearance: none;
 }
 
 .input-filtro:hover {
