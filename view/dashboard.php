@@ -1,5 +1,7 @@
 <?php
-// Inclui o motor central de base de dados da pasta db (que já cria e valida tudo)
+if (session_status() === PHP_SESSION_NONE) {
+    session_start();
+}
 include '../db/conexao.php';
 
 $entradas = 0;
@@ -8,9 +10,24 @@ $saldo = 0;
 $transacoes = [];
 $erro = '';
 
-// 1. Lógica do Filtro de Datas
-$data_inicio = isset($_GET['data_inicio']) ? $_GET['data_inicio'] : date('Y-m-01');
-$data_fim = isset($_GET['data_fim']) ? $_GET['data_fim'] : date('Y-m-t');
+if (isset($_GET['data_inicio']) && isset($_GET['data_fim'])) {
+    // Se o usuário usou o formulário agora, pega do GET e atualiza a Sessão
+    $data_inicio = $_GET['data_inicio'];
+    $data_fim = $_GET['data_fim'];
+    
+    $_SESSION['filtro_data_inicio'] = $data_inicio;
+    $_SESSION['filtro_data_fim'] = $data_fim;
+    
+} elseif (isset($_SESSION['filtro_data_inicio']) && isset($_SESSION['filtro_data_fim'])) {
+    // Se não veio pelo GET, mas já existe na Sessão
+    $data_inicio = $_SESSION['filtro_data_inicio'];
+    $data_fim = $_SESSION['filtro_data_fim'];
+    
+} else {
+    // Se for o primeiro acesso absoluto, usa a data do mês atual
+    $data_inicio = date('Y-m-01');
+    $data_fim = date('Y-m-t');
+}
 
 try {
     // 2. SQL Mágico
@@ -48,7 +65,7 @@ try {
 
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
-    <link rel="shortcut icon" href="../media/logoUaiMoney.png" type="image/x-icon">
+    <link rel="shortcut icon" href="../media/icon.png" type="image/x-icon">
     <link rel="stylesheet" href="../css/style.css">
 </head>
 
@@ -60,7 +77,7 @@ try {
         <section class="dashboard-toolbar mb-4">
             <div class="toolbar-top">
                 <div class="brand-area">
-                    <img src="../media/logoUaiMoney.png" alt="Logo UaiMoney" class="brand-logo" style="background-color: #fff; border-radius: 14px;">
+                    <img src="../media/logoDark.png" alt="Logo UaiMoney" class="brand-logo">
                     <div class="brand-separator"></div>
                     <div class="brand-copy">
                         <h1 class="dashboard-title">Visão financeira</h1>
@@ -147,29 +164,46 @@ try {
 
         <!-- TABELA -->
         <div class="card-custom transaction-card">
-            <div class="transaction-header">
-                <h4 class="transaction-title" id="titulo-tabela">
-                    <span class="transaction-title-icon"><i class="bi bi-receipt"></i></span>
-                    <span>Transações de <?php echo date('d/m/Y', strtotime($data_inicio)); ?> a <?php echo date('d/m/Y', strtotime($data_fim)); ?></span>
-                </h4>
-                <span class="transaction-count">
-                    <?php echo count($transacoes); ?> <?php echo count($transacoes) === 1 ? 'registro' : 'registros'; ?>
-                </span>
+            <div class="transaction-header" style="display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 15px;">
+                <div style="display: flex; align-items: center; gap: 15px;">
+                    <h4 class="transaction-title" id="titulo-tabela" style="margin: 0;">
+                        <span class="transaction-title-icon"><i class="bi bi-receipt"></i></span>
+                        <span>Transações de <?php echo date('d/m/Y', strtotime($data_inicio)); ?> a <?php echo date('d/m/Y', strtotime($data_fim)); ?></span>
+                    </h4>
+                    <span class="transaction-count">
+                        <?php echo count($transacoes); ?> <?php echo count($transacoes) === 1 ? 'registro' : 'registros'; ?>
+                    </span>
+                </div>
+                <!-- NOVO: Filtro Global Rápido -->
+                <div>
+                    <input type="text" id="filtroGlobal" class="input-global-busca" placeholder="🔍 Buscar em tudo..." onkeyup="aplicarFiltros()">
+                </div>
             </div>
 
             <div class="table-wrapper">
                 <div class="table-responsive">
-                    <table class="table align-middle table-hover">
+                    <table class="table align-middle table-hover" id="tabelaTransacoes">
                         <thead>
                             <tr>
-                                <th>Data</th>
-                                <th>Tipo</th>
-                                <th>Grupo</th>
-                                <th>Subgrupo</th>
-                                <th>Descrição</th>
-                                <th>Pagamento</th>
-                                <th>Valor</th>
+                                <th class="col-sortable" onclick="ordenarTabela(0)">Data <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(1)">Tipo <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(2)">Grupo <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(3)">Subgrupo <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(4)">Descrição <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(5)">Pagamento <i class="bi bi-arrow-down-up icone-sort"></i></th>
+                                <th class="col-sortable" onclick="ordenarTabela(6)">Valor <i class="bi bi-arrow-down-up icone-sort"></i></th>
                                 <th class="text-center">Ações</th>
+                            </tr>
+                            <!-- NOVO: Linha de Filtros por Coluna -->
+                            <tr>
+                                <td><input type="text" class="input-filtro-coluna" data-col="0" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="1" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="2" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="3" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="4" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="5" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td><input type="text" class="input-filtro-coluna" data-col="6" placeholder="Filtrar..." onkeyup="aplicarFiltros()"></td>
+                                <td></td>
                             </tr>
                         </thead>
                         <tbody>

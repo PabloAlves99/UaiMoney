@@ -83,10 +83,15 @@ body {
 }
 
 .brand-logo {
-    height: 45px;
-    /* Ajuste para o tamanho da sua logo */
-    width: auto;
+    width: 210px;
+    height: auto;
+    max-height: 56px;
+    object-fit: contain;
     display: block;
+
+    filter: drop-shadow(
+        0 4px 12px rgba(56, 189, 248, 0.10)
+    );
 }
 
 .brand-separator {
@@ -605,4 +610,51 @@ body {
         padding-left: 0;
         padding-right: 0;
     }
+}
+
+/* Novos estilos para Ordenação e Filtros */
+.col-sortable {
+    cursor: pointer;
+    transition: color 0.2s;
+    white-space: nowrap;
+}
+
+.col-sortable:hover {
+    color: #38bdf8 !important;
+}
+
+.icone-sort {
+    font-size: 0.75rem;
+    opacity: 0.4;
+    margin-left: 4px;
+}
+
+.input-filtro-coluna {
+    background-color: transparent;
+    border: 1px solid #334155;
+    color: #f8fafc;
+    font-size: 0.8rem;
+    padding: 4px 8px;
+    border-radius: 4px;
+    width: 100%;
+}
+
+.input-filtro-coluna:focus {
+    border-color: #0ea5e9;
+    outline: none;
+}
+
+.input-global-busca {
+    background-color: transparent;
+    border: 1px solid #334155;
+    color: #fff;
+    padding: 6px 12px;
+    border-radius: 8px;
+    font-size: 0.9rem;
+    width: 250px;
+}
+
+.input-global-busca:focus {
+    border-color: #0ea5e9;
+    outline: none;
 }

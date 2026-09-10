@@ -129,6 +129,7 @@ try {
     <title>Nova Saída - UaiMoney</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
+    <link rel="shortcut icon" href="../media/icon.png" type="image/x-icon">
     <style>
         body {
             background-color: #0b132b;
@@ -262,11 +263,11 @@ try {
                             <label class="form-label" style="color: #38bdf8;">💳 Qual é o Banco / Cartão?</label>
                             <select name="banco_cartao" class="form-select border-info">
                                 <option value="Santander">Santander</option>
-                                <option value="Inter">Banco Inter</option>
-                                <option value="Bradesco">Bradesco</option>
-                                <option value="Itaú">Itaú</option>
-                                <option value="C6 Bank">C6 Bank</option>
                                 <option value="Nubank">Nubank</option>
+                                <option value="Inter">Inter</option>
+                                <option value="Caixa">Caixa</option>
+                                <option value="Banco do Brasil">Banco do Brasil</option>
+                                <option value="Bradesco">Bradesco</option>
                                 <option value="Outro">Outro Banco</option>
                             </select>
                         </div>
