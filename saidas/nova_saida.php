@@ -126,17 +126,13 @@ try {
 
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Nova Saída - UaiMoney</title>
     <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
     <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.10.5/font/bootstrap-icons.css">
     <link rel="shortcut icon" href="../media/icon.png" type="image/x-icon">
+    <link rel="stylesheet" href="../css/style.css">
     <style>
-        body {
-            background-color: #0b132b;
-            color: #ffffff;
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        }
-
         .card-custom {
             border-radius: 14px;
             background-color: #1c2541;
@@ -209,7 +205,7 @@ try {
 </head>
 
 <body>
-    <div class="container mt-5 mb-5">
+    <div class="container mt-2">
         <div class="row justify-content-center">
             <div class="col-md-6">
                 <h2 class="text-center mb-4" style="color: #f87171;">📉 Despesa (Saída)</h2>
