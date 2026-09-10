@@ -89,9 +89,7 @@ body {
     object-fit: contain;
     display: block;
 
-    filter: drop-shadow(
-        0 4px 12px rgba(56, 189, 248, 0.10)
-    );
+    filter: drop-shadow(0 4px 12px rgba(56, 189, 248, 0.10));
 }
 
 .brand-separator {
@@ -657,4 +655,70 @@ body {
 .input-global-busca:focus {
     border-color: #0ea5e9;
     outline: none;
+}
+
+/* =====================================================
+   RESPONSIVO OTIMIZADO PARA CELULAR
+====================================================== */
+@media (max-width: 575.98px) {
+    .container-dashboard {
+        padding-left: 10px;
+        padding-right: 10px;
+    }
+
+    .toolbar-top {
+        padding: 14px 12px 12px;
+        gap: 12px;
+    }
+
+    .brand-area {
+        width: 100%;
+        justify-content: center;
+        /* Centraliza a logo no celular */
+        margin-bottom: 4px;
+    }
+
+    .brand-logo {
+        width: 140px;
+        /* Ainda menor no mobile */
+    }
+
+    .brand-separator,
+    .brand-copy {
+        display: none;
+    }
+
+    .toolbar-actions {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        width: 100%;
+        gap: 6px;
+        /* Botões mais próximos */
+    }
+
+    .btn-modern {
+        width: 100%;
+        padding-left: 6px;
+        padding-right: 6px;
+        font-size: 0.75rem;
+        /* Fonte menor para não quebrar a linha */
+    }
+
+    .filter-bar {
+        display: flex;
+        flex-direction: column;
+        align-items: stretch;
+        padding: 12px 12px 16px;
+        gap: 10px;
+    }
+
+    .filter-buttons {
+        width: 100%;
+        margin-top: 4px;
+    }
+
+    .btn-info-custom {
+        flex: 1;
+        width: 100%;
+    }
 }
