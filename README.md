@@ -7,7 +7,7 @@ O UaiMoney nasceu com a proposta de ser um Produto Mínimo Viável (MVP) rápido
 
 ## Tecnologias Utilizadas
 * Front-end: HTML, CSS (Bootstrap) e JavaScript.
-* Back-end: PHP nativo.
+* Back-end: PHP.
 * Banco de Dados: SQLite (Arquivo único local).
 * Gráficos: Chart.js.
 
