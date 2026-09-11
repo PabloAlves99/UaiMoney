@@ -1,5 +1,5 @@
 <?php
-// Inclui o motor central de base de dados e migrações
+require_once('../auth.php');
 include '../db/conexao.php';
 
 $mensagem = '';

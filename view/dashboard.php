@@ -1,7 +1,6 @@
 <?php
-if (session_status() === PHP_SESSION_NONE) {
-    session_start();
-}
+require_once('../auth.php');
+
 include '../db/conexao.php';
 
 $entradas = 0;
@@ -14,15 +13,13 @@ if (isset($_GET['data_inicio']) && isset($_GET['data_fim'])) {
     // Se o usuário usou o formulário agora, pega do GET e atualiza a Sessão
     $data_inicio = $_GET['data_inicio'];
     $data_fim = $_GET['data_fim'];
-    
+
     $_SESSION['filtro_data_inicio'] = $data_inicio;
     $_SESSION['filtro_data_fim'] = $data_fim;
-    
 } elseif (isset($_SESSION['filtro_data_inicio']) && isset($_SESSION['filtro_data_fim'])) {
     // Se não veio pelo GET, mas já existe na Sessão
     $data_inicio = $_SESSION['filtro_data_inicio'];
     $data_fim = $_SESSION['filtro_data_fim'];
-    
 } else {
     // Se for o primeiro acesso absoluto, usa a data do mês atual
     $data_inicio = date('Y-m-01');
@@ -92,7 +89,16 @@ try {
                     <a href="../saidas/nova_saida.php" class="btn-modern btn-danger-modern">
                         <i class="bi bi-dash-lg"></i> Nova Despesa
                     </a>
+                    <a href="../logout.php" class="btn btn-outline-danger btn-modern" title="Sair do Sistema">
+                        <i class="bi bi-box-arrow-right"></i> Sair
+                    </a>
+                    <?php if (isset($_SESSION['usuario_tipo']) && $_SESSION['usuario_tipo'] === 'adm'): ?>
+                        <a href="../usuarios/novo_usuario.php" class="btn btn-outline-info btn-modern" title="Gerenciar Usuários">
+                            <i class="bi bi-person-plus-fill"></i> Novo Usuário
+                        </a>
+                    <?php endif; ?>
                 </div>
+
             </div>
 
             <form method="GET" class="filter-bar">

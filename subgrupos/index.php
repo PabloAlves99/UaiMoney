@@ -1,5 +1,5 @@
 <?php
-// Inclui o motor central de conexão e migrações da pasta db
+require_once('../auth.php');
 include '../db/conexao.php';
 
 $subgrupos = [];

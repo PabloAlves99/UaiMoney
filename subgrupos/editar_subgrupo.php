@@ -1,5 +1,5 @@
 <?php
-// Inclui o motor central de base de dados da pasta db
+require_once('../auth.php');
 include '../db/conexao.php';
 
 $mensagem = '';

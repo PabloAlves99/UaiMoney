@@ -1,5 +1,5 @@
 <?php
-// Inclui o motor central de conexão
+require_once('../auth.php');
 include '../db/conexao.php';
 
 $grupos = [];

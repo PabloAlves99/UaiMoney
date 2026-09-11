@@ -2,7 +2,6 @@
 date_default_timezone_set('America/Sao_Paulo');
 
 try {
-    // Como o script está na pasta db, voltamos uma pasta para achar o banco na raiz
     $pdo = new PDO('sqlite:../banco.sqlite');
     $pdo->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
 
@@ -16,10 +15,10 @@ try {
     // 2. Tabela de Subgrupos com classificação completa
     $pdo->exec("CREATE TABLE IF NOT EXISTS subgrupos (
         id INTEGER PRIMARY KEY AUTOINCREMENT,
-        tipo TEXT NOT NULL,       -- 'Entrada' ou 'Saída'
-        grupo TEXT NOT NULL,      -- Ex: 'Essencial', 'Lazer', 'Investimento', 'Renda Fixa'
-        nome TEXT NOT NULL,       -- Ex: 'Supermercado', 'Aluguel', 'Salário'
-        descricao TEXT            -- Opcional
+        tipo TEXT NOT NULL,       
+        grupo TEXT NOT NULL,      
+        nome TEXT NOT NULL,      
+        descricao TEXT           
     )");
 
     // 3. Tabela de Transações original
@@ -35,37 +34,26 @@ try {
         descricao TEXT
     )");
 
-    // 4. Trava de Segurança: Adicionar colunas de recorrência caso ainda não existam
-    $colunasNovas = [
-        "tipo_registro" => "TEXT DEFAULT 'unico'", // 'unico', 'pai' ou 'parcela'
-        "numero_parcela" => "INTEGER DEFAULT 1",
-        "total_parcelas" => "INTEGER DEFAULT 1",
-        "id_grupo" => "INTEGER"
-    ];
-
-    $result = $pdo->query("PRAGMA table_info(transacoes)");
-    $colunasAtuais = [];
-    while ($row = $result->fetch(PDO::FETCH_ASSOC)) {
-        $colunasAtuais[] = $row['name'];
-    }
-
-    foreach ($colunasNovas as $coluna => $tipo) {
-        if (!in_array($coluna, $colunasAtuais)) {
-            $pdo->exec("ALTER TABLE transacoes ADD COLUMN $coluna $tipo");
-        }
-    }
+    // 4. Tabela de Usuários
+    $pdo->exec("CREATE TABLE IF NOT EXISTS usuarios (
+        id INTEGER PRIMARY KEY AUTOINCREMENT,
+        nome TEXT NOT NULL,
+        login TEXT NOT NULL UNIQUE,
+        email TEXT NOT NULL UNIQUE,
+        senha TEXT NOT NULL,
+        dtcad TEXT DEFAULT CURRENT_TIMESTAMP,
+        tipo TEXT NOT NULL DEFAULT 'Usuario' -- 'adm' ou 'usuario'
+    )");
 
 
     echo "<div style='font-family:Segoe UI; background:#1c2541; color:#34d399; padding:20px; border-radius:10px; margin:20px;'>
             <h3>Sucesso, Uai! 🚀</h3>
-            <p>Tabelas <b>grupos</b>, <b>subgrupos</b> e <b>transacoes</b> criadas e atualizadas para suportar recorrência!</p>
+            <p>Tabelas criadas com sucesso!</p>
             <p>Voltar para o <a href='../view/dashboard.php' style='color:#38bdf8;'>Painel Principal</a>.</p>
           </div>";
-
 } catch (Exception $e) {
     echo "<div style='font-family:Segoe UI; background:#1c2541; color:#f87171; padding:20px; border-radius:10px; margin:20px;'>
             <h3>Eita! Erro ao criar tabelas:</h3>
             <p>" . $e->getMessage() . "</p>
           </div>";
 }
-?>
