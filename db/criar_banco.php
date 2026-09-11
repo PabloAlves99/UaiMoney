@@ -31,7 +31,11 @@ try {
         subgrupo TEXT NOT NULL,
         forma_pagamento TEXT,
         banco_cartao TEXT,
-        descricao TEXT
+        descricao TEXT,
+        tipo_registro TEXT DEFAULT 'unico', -- 'unico', 'pai' ou 'parcela'
+        numero_parcela INTEGER DEFAULT 1,
+        total_parcelas INTEGER DEFAULT 1,
+        id_grupo INTEGER
     )");
 
     // 4. Tabela de Usuários
